@@ -1,0 +1,324 @@
+/**
+ * FinishFirst Background Service Worker
+ * Core blocking logic and focus session management
+ */
+
+import { browserAPI } from '../shared/browser-api';
+import { onMessage } from '../shared/messaging';
+import {
+  getStorageWithDefault,
+  setStorage,
+  updateStorage,
+  generateId,
+  type Goal,
+  type WhitelistPattern,
+  type FocusSession,
+} from '../shared/storage';
+import { isUrlWhitelisted } from '../shared/whitelist';
+
+// Track the last blocked URL for the blocked page
+let lastBlockedUrl = '';
+
+/**
+ * Check if blocking should be active
+ */
+async function shouldBlock(): Promise<boolean> {
+  const session = await getStorageWithDefault('focusSession');
+
+  // Not blocking if focus mode is off
+  if (!session.active) return false;
+
+  // Not blocking during break time
+  if (session.breakUntil && Date.now() < session.breakUntil) return false;
+
+  // Check if break has expired - if so, reset breakUntil
+  if (session.breakUntil && Date.now() >= session.breakUntil) {
+    await updateStorage('focusSession', { breakUntil: null });
+  }
+
+  return true;
+}
+
+/**
+ * Check if a URL should be blocked
+ */
+async function shouldBlockUrl(url: string): Promise<{ blocked: boolean; reason?: string }> {
+  // Never block empty or invalid URLs
+  if (!url || url === 'about:blank') {
+    return { blocked: false, reason: 'empty-url' };
+  }
+
+  // Never block the blocked page itself
+  if (url.includes('blocked/blocked.html')) {
+    return { blocked: false, reason: 'blocked-page' };
+  }
+
+  // Check if blocking is active
+  if (!(await shouldBlock())) {
+    return { blocked: false, reason: 'focus-inactive' };
+  }
+
+  // Check whitelist
+  const whitelist = await getStorageWithDefault('whitelist');
+  if (isUrlWhitelisted(url, whitelist)) {
+    return { blocked: false, reason: 'whitelisted' };
+  }
+
+  return { blocked: true };
+}
+
+/**
+ * Get the blocked page URL with the original URL as parameter
+ */
+function getBlockedPageUrl(originalUrl: string): string {
+  const blockedPage = chrome.runtime.getURL('blocked/blocked.html');
+  return `${blockedPage}?url=${encodeURIComponent(originalUrl)}`;
+}
+
+/**
+ * Handle navigation - redirect blocked URLs
+ */
+async function handleNavigation(
+  details: chrome.webNavigation.WebNavigationTransitionCallbackDetails
+): Promise<void> {
+  // Only handle main frame navigations
+  if (details.frameId !== 0) return;
+
+  const { blocked } = await shouldBlockUrl(details.url);
+
+  if (blocked) {
+    lastBlockedUrl = details.url;
+
+    // Increment blocked attempts stat
+    const stats = await getStorageWithDefault('stats');
+    await updateStorage('stats', { blockedAttempts: stats.blockedAttempts + 1 });
+
+    // Redirect to blocked page
+    await chrome.tabs.update(details.tabId, {
+      url: getBlockedPageUrl(details.url),
+    });
+  }
+}
+
+/**
+ * Update badge based on focus state
+ */
+async function updateBadge(): Promise<void> {
+  const session = await getStorageWithDefault('focusSession');
+
+  if (session.active) {
+    if (session.breakUntil && Date.now() < session.breakUntil) {
+      // On break
+      await browserAPI.action.setBadgeText({ text: 'BRK' });
+      await browserAPI.action.setBadgeBackgroundColor({ color: '#FFA500' });
+    } else {
+      // Active focus
+      await browserAPI.action.setBadgeText({ text: 'ON' });
+      await browserAPI.action.setBadgeBackgroundColor({ color: '#4CAF50' });
+    }
+  } else {
+    await browserAPI.action.setBadgeText({ text: '' });
+  }
+  await browserAPI.action.setBadgeTextColor({ color: '#FFFFFF' });
+}
+
+/**
+ * Start a focus session
+ */
+async function startFocus(goalText: string): Promise<FocusSession> {
+  const goal: Goal = {
+    id: generateId(),
+    text: goalText,
+    createdAt: Date.now(),
+  };
+
+  const session: FocusSession = {
+    active: true,
+    startedAt: Date.now(),
+    currentGoal: goal,
+    breakUntil: null,
+  };
+
+  await setStorage('focusSession', session);
+  await updateBadge();
+
+  console.log('[FinishFirst] Focus started:', goal.text);
+  return session;
+}
+
+/**
+ * Complete the current task
+ */
+async function completeTask(): Promise<number | null> {
+  const session = await getStorageWithDefault('focusSession');
+  const settings = await getStorageWithDefault('settings');
+
+  if (!session.active || !session.currentGoal) {
+    return null;
+  }
+
+  // Calculate focus duration
+  const focusDuration = session.startedAt ? Math.floor((Date.now() - session.startedAt) / 60000) : 0;
+
+  // Update stats
+  const stats = await getStorageWithDefault('stats');
+  await updateStorage('stats', {
+    completedTasks: stats.completedTasks + 1,
+    focusMinutes: stats.focusMinutes + focusDuration,
+  });
+
+  // Mark goal as completed and save to history
+  const completedGoal: Goal = {
+    ...session.currentGoal,
+    completedAt: Date.now(),
+  };
+
+  const completedGoals = await getStorageWithDefault('completedGoals');
+  await setStorage('completedGoals', [...completedGoals, completedGoal]);
+
+  // Set break time
+  const breakUntil = Date.now() + settings.breakDuration * 60 * 1000;
+
+  // Update session - keep active but with break
+  await updateStorage('focusSession', {
+    currentGoal: null,
+    breakUntil,
+  });
+
+  await updateBadge();
+  console.log('[FinishFirst] Task completed! Break until:', new Date(breakUntil).toLocaleTimeString());
+
+  return breakUntil;
+}
+
+/**
+ * Cancel the current focus session
+ */
+async function cancelFocus(): Promise<void> {
+  const settings = await getStorageWithDefault('settings');
+
+  if (settings.strictMode) {
+    console.log('[FinishFirst] Cannot cancel in strict mode');
+    return;
+  }
+
+  await setStorage('focusSession', {
+    active: false,
+    startedAt: null,
+    currentGoal: null,
+    breakUntil: null,
+  });
+
+  await updateBadge();
+  console.log('[FinishFirst] Focus cancelled');
+}
+
+// Extension lifecycle
+chrome.runtime.onInstalled.addListener(async (details) => {
+  if (details.reason === 'install') {
+    console.log('[FinishFirst] Installed');
+    await updateBadge();
+  } else if (details.reason === 'update') {
+    console.log('[FinishFirst] Updated to', chrome.runtime.getManifest().version);
+  }
+});
+
+// Navigation listener for blocking
+chrome.webNavigation.onCommitted.addListener(handleNavigation);
+
+// Message handlers
+onMessage({
+  START_FOCUS: async ({ goalText }) => {
+    const session = await startFocus(goalText);
+    return { success: true, session };
+  },
+
+  COMPLETE_TASK: async () => {
+    const breakUntil = await completeTask();
+    return { success: breakUntil !== null, breakUntil: breakUntil ?? undefined };
+  },
+
+  CANCEL_FOCUS: async () => {
+    const settings = await getStorageWithDefault('settings');
+    if (settings.strictMode) {
+      return { success: false };
+    }
+    await cancelFocus();
+    return { success: true };
+  },
+
+  GET_FOCUS_STATE: async () => {
+    const session = await getStorageWithDefault('focusSession');
+    const isBlocking = await shouldBlock();
+    return { session, isBlocking };
+  },
+
+  ADD_WHITELIST: async ({ pattern, label }) => {
+    const newPattern: WhitelistPattern = {
+      id: generateId(),
+      pattern,
+      label,
+      enabled: true,
+    };
+
+    const whitelist = await getStorageWithDefault('whitelist');
+    await setStorage('whitelist', [...whitelist, newPattern]);
+
+    return { success: true, pattern: newPattern };
+  },
+
+  REMOVE_WHITELIST: async ({ id }) => {
+    const whitelist = await getStorageWithDefault('whitelist');
+    await setStorage(
+      'whitelist',
+      whitelist.filter((p) => p.id !== id)
+    );
+    return { success: true };
+  },
+
+  TOGGLE_WHITELIST: async ({ id, enabled }) => {
+    const whitelist = await getStorageWithDefault('whitelist');
+    await setStorage(
+      'whitelist',
+      whitelist.map((p) => (p.id === id ? { ...p, enabled } : p))
+    );
+    return { success: true };
+  },
+
+  GET_WHITELIST: async () => {
+    const patterns = await getStorageWithDefault('whitelist');
+    return { patterns };
+  },
+
+  CHECK_URL: async ({ url }) => {
+    const result = await shouldBlockUrl(url);
+    return { allowed: !result.blocked, reason: result.reason };
+  },
+
+  GET_SETTINGS: async () => {
+    const settings = await getStorageWithDefault('settings');
+    return { settings };
+  },
+
+  UPDATE_SETTINGS: async (updates) => {
+    await updateStorage('settings', updates);
+    return { success: true };
+  },
+
+  GET_STATS: async () => {
+    const stats = await getStorageWithDefault('stats');
+    return { stats };
+  },
+
+  GET_BLOCKED_INFO: async () => {
+    const session = await getStorageWithDefault('focusSession');
+    return {
+      goal: session.currentGoal,
+      blockedUrl: lastBlockedUrl,
+    };
+  },
+});
+
+// Initialize on load
+updateBadge();
+console.log('[FinishFirst] Background script loaded');

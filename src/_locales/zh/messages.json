@@ -1,0 +1,101 @@
+{
+  "extension_name": {
+    "message": "先完成任务"
+  },
+  "extension_description": {
+    "message": "ADHD 生产力工具 - 设定目标，屏蔽干扰，先完成任务"
+  },
+
+  "popup_title": {
+    "message": "先完成任务"
+  },
+  "popup_current_goal": {
+    "message": "当前目标"
+  },
+  "popup_no_goal": {
+    "message": "没有进行中的目标"
+  },
+  "popup_set_goal": {
+    "message": "设定目标"
+  },
+  "popup_complete": {
+    "message": "完成"
+  },
+  "popup_cancel": {
+    "message": "取消"
+  },
+  "popup_focus_mode": {
+    "message": "专注模式"
+  },
+  "popup_whitelist": {
+    "message": "快捷白名单"
+  },
+  "popup_settings": {
+    "message": "设置"
+  },
+  "popup_stats": {
+    "message": "今日统计"
+  },
+  "popup_completed_tasks": {
+    "message": "已完成"
+  },
+  "popup_focus_time": {
+    "message": "专注时间"
+  },
+
+  "blocked_title": {
+    "message": "专注于你的目标"
+  },
+  "blocked_subtitle": {
+    "message": "该网站已被屏蔽，直到你完成当前任务"
+  },
+  "blocked_your_goal": {
+    "message": "你的目标"
+  },
+  "blocked_complete_btn": {
+    "message": "我已完成任务"
+  },
+  "blocked_back_btn": {
+    "message": "返回"
+  },
+  "blocked_site": {
+    "message": "被屏蔽的网站"
+  },
+
+  "options_title": {
+    "message": "先完成任务 设置"
+  },
+  "options_subtitle": {
+    "message": "配置专注设置和白名单规则"
+  },
+  "options_section_whitelist": {
+    "message": "白名单规则"
+  },
+  "options_whitelist_desc": {
+    "message": "添加专注模式下允许访问的网址规则（正则表达式）"
+  },
+  "options_add_pattern": {
+    "message": "添加规则"
+  },
+  "options_pattern_placeholder": {
+    "message": "例如: ^https://docs\\.google\\.com/.*"
+  },
+  "options_section_behavior": {
+    "message": "行为设置"
+  },
+  "options_break_duration": {
+    "message": "休息时长（分钟）"
+  },
+  "options_break_desc": {
+    "message": "完成任务后的自由浏览时间"
+  },
+  "options_strict_mode": {
+    "message": "严格模式"
+  },
+  "options_strict_desc": {
+    "message": "不完成任务无法关闭专注模式"
+  },
+  "options_saved": {
+    "message": "设置已保存！"
+  }
+}

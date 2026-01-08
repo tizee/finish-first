@@ -1,0 +1,133 @@
+{
+  "extension_name": {
+    "message": "FinishFirst",
+    "description": "Extension name"
+  },
+  "extension_description": {
+    "message": "ADHD productivity tool - Set a goal, block distractions, finish first",
+    "description": "Extension description"
+  },
+
+  "popup_title": {
+    "message": "FinishFirst",
+    "description": "Popup title"
+  },
+  "popup_current_goal": {
+    "message": "Current Goal",
+    "description": "Current goal label"
+  },
+  "popup_no_goal": {
+    "message": "No active goal",
+    "description": "No goal message"
+  },
+  "popup_set_goal": {
+    "message": "Set Goal",
+    "description": "Set goal button"
+  },
+  "popup_complete": {
+    "message": "Complete",
+    "description": "Mark complete button"
+  },
+  "popup_cancel": {
+    "message": "Cancel",
+    "description": "Cancel goal button"
+  },
+  "popup_focus_mode": {
+    "message": "Focus Mode",
+    "description": "Focus mode toggle"
+  },
+  "popup_whitelist": {
+    "message": "Quick Whitelist",
+    "description": "Quick whitelist section"
+  },
+  "popup_settings": {
+    "message": "Settings",
+    "description": "Link to settings page"
+  },
+  "popup_stats": {
+    "message": "Today's Stats",
+    "description": "Stats section title"
+  },
+  "popup_completed_tasks": {
+    "message": "Completed",
+    "description": "Completed tasks label"
+  },
+  "popup_focus_time": {
+    "message": "Focus Time",
+    "description": "Focus time label"
+  },
+
+  "blocked_title": {
+    "message": "Focus on Your Goal",
+    "description": "Blocked page title"
+  },
+  "blocked_subtitle": {
+    "message": "This site is blocked until you complete your task",
+    "description": "Blocked page subtitle"
+  },
+  "blocked_your_goal": {
+    "message": "Your Goal",
+    "description": "Goal label on blocked page"
+  },
+  "blocked_complete_btn": {
+    "message": "I've Completed My Task",
+    "description": "Complete button on blocked page"
+  },
+  "blocked_back_btn": {
+    "message": "Go Back",
+    "description": "Go back button"
+  },
+  "blocked_site": {
+    "message": "Blocked Site",
+    "description": "Blocked site label"
+  },
+
+  "options_title": {
+    "message": "FinishFirst Settings",
+    "description": "Options page title"
+  },
+  "options_subtitle": {
+    "message": "Configure your focus settings and whitelist patterns",
+    "description": "Options page subtitle"
+  },
+  "options_section_whitelist": {
+    "message": "Whitelist Patterns",
+    "description": "Whitelist section title"
+  },
+  "options_whitelist_desc": {
+    "message": "Add URL patterns (regex) for sites allowed during focus mode",
+    "description": "Whitelist description"
+  },
+  "options_add_pattern": {
+    "message": "Add Pattern",
+    "description": "Add pattern button"
+  },
+  "options_pattern_placeholder": {
+    "message": "e.g., ^https://docs\\.google\\.com/.*",
+    "description": "Pattern input placeholder"
+  },
+  "options_section_behavior": {
+    "message": "Behavior",
+    "description": "Behavior section title"
+  },
+  "options_break_duration": {
+    "message": "Break Duration (minutes)",
+    "description": "Break duration setting"
+  },
+  "options_break_desc": {
+    "message": "Free browsing time after completing a task",
+    "description": "Break duration description"
+  },
+  "options_strict_mode": {
+    "message": "Strict Mode",
+    "description": "Strict mode toggle"
+  },
+  "options_strict_desc": {
+    "message": "Prevent disabling focus mode without completing task",
+    "description": "Strict mode description"
+  },
+  "options_saved": {
+    "message": "Settings saved!",
+    "description": "Save confirmation message"
+  }
+}

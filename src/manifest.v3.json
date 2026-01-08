@@ -1,0 +1,42 @@
+{
+  "name": "__MSG_extension_name__",
+  "author": "tizee",
+  "manifest_version": 3,
+  "version": "1.0.0",
+  "description": "__MSG_extension_description__",
+  "default_locale": "en",
+  "permissions": [
+    "storage",
+    "tabs",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background/index.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": true
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["blocked/blocked.html", "blocked/index.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="options_title">FinishFirst Settings</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-color: #0f0f23;
+      --bg-secondary: #1a1a2e;
+      --text-color: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --accent-color: #4f46e5;
+      --accent-hover: #6366f1;
+      --success-color: #22c55e;
+      --danger-color: #ef4444;
+    }
+
+    body {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      background: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.5;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    /* Sections */
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Settings card */
+    .setting {
+      padding: 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .setting-info {
+      flex: 1;
+    }
+
+    .setting-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .setting-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .setting-control {
+      margin-left: 16px;
+    }
+
+    /* Toggle switch */
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--border-color);
+      transition: 0.3s;
+      border-radius: 24px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background-color: var(--accent-color);
+    }
+
+    .toggle input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Number input */
+    input[type="number"] {
+      width: 80px;
+      padding: 8px 12px;
+      font-size: 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-color);
+      color: var(--text-color);
+      text-align: center;
+    }
+
+    input[type="number"]:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    /* Whitelist patterns */
+    .whitelist-container {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .whitelist-header {
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .whitelist-header p {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .add-pattern-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .add-pattern-row input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-size: 14px;
+    }
+
+    .add-pattern-row input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
+
+    .add-pattern-row input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--danger-color);
+      padding: 4px 8px;
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .whitelist-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .whitelist-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .whitelist-item:last-child {
+      border-bottom: none;
+    }
+
+    .whitelist-item.disabled {
+      opacity: 0.5;
+    }
+
+    .whitelist-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .whitelist-item-label {
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .whitelist-item-pattern {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: monospace;
+      word-break: break-all;
+    }
+
+    .whitelist-item-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 12px;
+    }
+
+    .whitelist-empty {
+      padding: 24px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    /* Templates */
+    .templates {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .template-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .template-btn:hover {
+      border-color: var(--accent-color);
+      color: var(--text-color);
+    }
+
+    /* Save message */
+    .saved-msg {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      background: var(--success-color);
+      color: white;
+      border-radius: 8px;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 100;
+    }
+
+    .saved-msg.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <h1>🎯 FinishFirst Settings</h1>
+  <p class="subtitle" data-i18n="options_subtitle">Configure your focus settings and whitelist patterns</p>
+
+  <!-- Behavior Settings -->
+  <div class="section">
+    <div class="section-title" data-i18n="options_section_behavior">⚙️ Behavior</div>
+
+    <div class="setting">
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-title" data-i18n="options_break_duration">Break Duration (minutes)</div>
+          <div class="setting-desc" data-i18n="options_break_desc">Free browsing time after completing a task</div>
+        </div>
+        <div class="setting-control">
+          <input type="number" id="breakDuration" min="1" max="60" value="5">
+        </div>
+      </div>
+    </div>
+
+    <div class="setting">
+      <div class="setting-row">
+        <div class="setting-info">
+          <div class="setting-title" data-i18n="options_strict_mode">Strict Mode</div>
+          <div class="setting-desc" data-i18n="options_strict_desc">Prevent disabling focus mode without completing task</div>
+        </div>
+        <div class="setting-control">
+          <label class="toggle">
+            <input type="checkbox" id="strictMode">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Whitelist Patterns -->
+  <div class="section">
+    <div class="section-title" data-i18n="options_section_whitelist">🔓 Whitelist Patterns</div>
+
+    <div class="whitelist-container">
+      <div class="whitelist-header">
+        <p data-i18n="options_whitelist_desc">Add URL patterns (regex) for sites allowed during focus mode</p>
+        <div class="add-pattern-row">
+          <input type="text" id="patternInput" placeholder="^https://docs\.google\.com/.*">
+          <input type="text" id="labelInput" placeholder="Label (e.g., Google Docs)" style="max-width: 180px;">
+          <button class="btn btn-primary" id="addPatternBtn" data-i18n="options_add_pattern">Add</button>
+        </div>
+        <div class="templates" id="templates">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="whitelist-list" id="whitelistList">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <div class="saved-msg" id="savedMsg" data-i18n="options_saved">Settings saved!</div>
+
+  <script src="index.js" type="module"></script>
+</body>
+</html>

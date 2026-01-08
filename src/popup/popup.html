@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-cream: #FDF8F3;
+      --bg-warm: #F5EDE4;
+      --bg-card: #FFFFFF;
+      --text-primary: #2D2A26;
+      --text-secondary: #6B635A;
+      --text-muted: #9C948A;
+      --accent-terracotta: #C4704B;
+      --accent-terracotta-light: #E8A988;
+      --accent-sage: #7B9E87;
+      --accent-sage-light: #B5D4BE;
+      --accent-amber: #D4A24C;
+      --accent-amber-light: #F5D89A;
+      --danger: #C75D5D;
+      --border-soft: rgba(45, 42, 38, 0.08);
+      --shadow-soft: 0 2px 8px rgba(45, 42, 38, 0.06);
+      --shadow-medium: 0 4px 16px rgba(45, 42, 38, 0.1);
+      --shadow-glow-sage: 0 0 20px rgba(123, 158, 135, 0.3);
+      --shadow-glow-amber: 0 0 20px rgba(212, 162, 76, 0.3);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse-soft {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    @keyframes breathe {
+      0%, 100% { box-shadow: var(--shadow-soft); }
+      50% { box-shadow: var(--shadow-glow-sage); }
+    }
+
+    body {
+      width: 340px;
+      padding: 20px;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+      background: var(--bg-cream);
+      color: var(--text-primary);
+      animation: fadeInUp 0.3s ease-out;
+    }
+
+    /* Subtle texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
+      opacity: 0.015;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-terracotta) 0%, var(--accent-terracotta-light) 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    h1 {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .settings-btn {
+      width: 36px;
+      height: 36px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      color: var(--text-secondary);
+    }
+
+    .settings-btn:hover {
+      background: var(--bg-warm);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .settings-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Stats row */
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stat-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.2s ease;
+      animation: fadeInUp 0.4s ease-out backwards;
+    }
+
+    .stat-item:nth-child(1) { animation-delay: 0.1s; }
+    .stat-item:nth-child(2) { animation-delay: 0.15s; }
+
+    .stat-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
+    }
+
+    .stat-icon {
+      width: 32px;
+      height: 32px;
+      margin: 0 auto 8px;
+      background: var(--bg-warm);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .stat-value {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 500;
+    }
+
+    /* Goal card */
+    .goal-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 18px;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+      transition: all 0.3s ease;
+      animation: fadeInUp 0.5s ease-out backwards;
+      animation-delay: 0.2s;
+    }
+
+    .goal-card.active {
+      border-color: var(--accent-sage);
+      animation: breathe 3s ease-in-out infinite;
+    }
+
+    .goal-card.on-break {
+      border-color: var(--accent-amber);
+      box-shadow: var(--shadow-glow-amber);
+    }
+
+    .goal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .goal-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .goal-status {
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .goal-status.active {
+      background: linear-gradient(135deg, var(--accent-sage-light) 0%, var(--accent-sage) 100%);
+      color: white;
+    }
+
+    .goal-status.inactive {
+      background: var(--bg-warm);
+      color: var(--text-muted);
+    }
+
+    .goal-status.break {
+      background: linear-gradient(135deg, var(--accent-amber-light) 0%, var(--accent-amber) 100%);
+      color: white;
+    }
+
+    .goal-text {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+
+    .goal-text.empty {
+      color: var(--text-muted);
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    .goal-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--border-soft);
+      border-radius: 12px;
+      background: var(--bg-cream);
+      color: var(--text-primary);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      margin-bottom: 14px;
+      resize: none;
+      transition: all 0.2s ease;
+    }
+
+    .goal-input:focus {
+      outline: none;
+      border-color: var(--accent-terracotta);
+      background: var(--bg-card);
+      box-shadow: 0 0 0 4px rgba(196, 112, 75, 0.1);
+    }
+
+    .goal-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .goal-timer {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      padding: 10px 14px;
+      background: var(--bg-warm);
+      border-radius: 10px;
+    }
+
+    .goal-timer svg {
+      width: 16px;
+      height: 16px;
+      color: var(--accent-sage);
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      background-size: 200% 100%;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .btn:hover::before {
+      opacity: 1;
+      animation: shimmer 1.5s ease-in-out;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-terracotta) 0%, #B85F3A 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(196, 112, 75, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(196, 112, 75, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--accent-sage) 0%, #6A8A75 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(123, 158, 135, 0.3);
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(123, 158, 135, 0.4);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-soft);
+      margin-top: 10px;
+    }
+
+    .btn-ghost:hover {
+      background: var(--bg-warm);
+      border-color: transparent;
+    }
+
+    .btn-danger-ghost {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid rgba(199, 93, 93, 0.3);
+      margin-top: 10px;
+    }
+
+    .btn-danger-ghost:hover {
+      background: rgba(199, 93, 93, 0.08);
+      border-color: var(--danger);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Break state */
+    .break-celebration {
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    .break-emoji {
+      font-size: 48px;
+      margin-bottom: 12px;
+      animation: pulse-soft 2s ease-in-out infinite;
+    }
+
+    .break-message {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .break-timer {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--accent-amber);
+      margin: 16px 0;
+      letter-spacing: -0.02em;
+    }
+
+    .break-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* Decorative elements */
+    .decorative-dots {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .decorative-dots.top-right {
+      top: -10px;
+      right: -10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">🎯</div>
+      <h1>FinishFirst</h1>
+    </div>
+    <button class="settings-btn" id="settingsBtn" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+    </button>
+  </div>
+
+  <div class="stats">
+    <div class="stat-item">
+      <div class="stat-icon">✓</div>
+      <div class="stat-value" id="completedCount">0</div>
+      <div class="stat-label" data-i18n="popup_completed_tasks">Completed</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon">⏱</div>
+      <div class="stat-value" id="focusTime">0m</div>
+      <div class="stat-label" data-i18n="popup_focus_time">Focus Time</div>
+    </div>
+  </div>
+
+  <div class="goal-card" id="goalCard">
+    <div class="goal-header">
+      <span class="goal-label" data-i18n="popup_current_goal">Current Goal</span>
+      <span class="goal-status inactive" id="goalStatus">Ready</span>
+    </div>
+
+    <!-- Inactive state -->
+    <div id="inactiveView">
+      <textarea
+        class="goal-input"
+        id="goalInput"
+        placeholder="What would you like to accomplish?"
+        rows="2"
+      ></textarea>
+      <button class="btn btn-primary" id="startBtn">
+        Begin Focus Session
+      </button>
+    </div>
+
+    <!-- Active state -->
+    <div id="activeView" class="hidden">
+      <div class="goal-text" id="goalText"></div>
+      <div class="goal-timer" id="goalTimer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span>Focused for 0m</span>
+      </div>
+      <button class="btn btn-success" id="completeBtn">
+        Mark as Complete
+      </button>
+      <button class="btn btn-danger-ghost" id="cancelBtn">
+        End Session
+      </button>
+    </div>
+
+    <!-- Break state -->
+    <div id="breakView" class="hidden">
+      <div class="break-celebration">
+        <div class="break-emoji">🌟</div>
+        <div class="break-message">Well done!</div>
+        <div class="break-subtitle">Enjoy your well-deserved break</div>
+        <div class="break-timer" id="breakTimer">5:00</div>
+      </div>
+      <button class="btn btn-primary" id="newGoalBtn">
+        Start Next Goal
+      </button>
+    </div>
+  </div>
+
+  <script src="index.js" type="module"></script>
+</body>
+</html>
