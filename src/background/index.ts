@@ -28,12 +28,16 @@ async function shouldBlock(): Promise<boolean> {
   // Not blocking if focus mode is off
   if (!session.active) return false;
 
-  // Not blocking during break time
-  if (session.breakUntil && Date.now() < session.breakUntil) return false;
-
-  // Check if break has expired - if so, reset breakUntil
-  if (session.breakUntil && Date.now() >= session.breakUntil) {
-    await updateStorage('focusSession', { breakUntil: null });
+  // Only block when there is an active goal
+  if (!session.currentGoal) {
+    if (session.active || session.breakUntil) {
+      await updateStorage('focusSession', {
+        active: false,
+        startedAt: null,
+        breakUntil: null,
+      });
+    }
+    return false;
   }
 
   return true;
@@ -107,14 +111,12 @@ async function updateBadge(): Promise<void> {
   const session = await getStorageWithDefault('focusSession');
 
   if (session.active) {
-    if (session.breakUntil && Date.now() < session.breakUntil) {
-      // On break
-      await browserAPI.action.setBadgeText({ text: 'BRK' });
-      await browserAPI.action.setBadgeBackgroundColor({ color: '#FFA500' });
-    } else {
+    if (session.currentGoal) {
       // Active focus
       await browserAPI.action.setBadgeText({ text: 'ON' });
       await browserAPI.action.setBadgeBackgroundColor({ color: '#4CAF50' });
+    } else {
+      await browserAPI.action.setBadgeText({ text: '' });
     }
   } else {
     await browserAPI.action.setBadgeText({ text: '' });
@@ -149,12 +151,11 @@ async function startFocus(goalText: string): Promise<FocusSession> {
 /**
  * Complete the current task
  */
-async function completeTask(): Promise<number | null> {
+async function completeTask(): Promise<boolean> {
   const session = await getStorageWithDefault('focusSession');
-  const settings = await getStorageWithDefault('settings');
 
   if (!session.active || !session.currentGoal) {
-    return null;
+    return false;
   }
 
   // Calculate focus duration
@@ -176,19 +177,18 @@ async function completeTask(): Promise<number | null> {
   const completedGoals = await getStorageWithDefault('completedGoals');
   await setStorage('completedGoals', [...completedGoals, completedGoal]);
 
-  // Set break time
-  const breakUntil = Date.now() + settings.breakDuration * 60 * 1000;
-
-  // Update session - keep active but with break
+  // End focus session after completion
   await updateStorage('focusSession', {
+    active: false,
+    startedAt: null,
     currentGoal: null,
-    breakUntil,
+    breakUntil: null,
   });
 
   await updateBadge();
-  console.log('[FinishFirst] Task completed! Break until:', new Date(breakUntil).toLocaleTimeString());
+  console.log('[FinishFirst] Task completed! Focus session ended.');
 
-  return breakUntil;
+  return true;
 }
 
 /**
@@ -234,8 +234,8 @@ onMessage({
   },
 
   COMPLETE_TASK: async () => {
-    const breakUntil = await completeTask();
-    return { success: breakUntil !== null, breakUntil: breakUntil ?? undefined };
+    const success = await completeTask();
+    return { success };
   },
 
   CANCEL_FOCUS: async () => {
@@ -301,7 +301,18 @@ onMessage({
   },
 
   UPDATE_SETTINGS: async (updates) => {
+    const before = await getStorageWithDefault('settings');
     await updateStorage('settings', updates);
+    const after = await getStorageWithDefault('settings');
+    const changed: Record<string, { from: unknown; to: unknown }> = {};
+    (Object.keys(updates) as (keyof typeof updates)[]).forEach((key) => {
+      if (before[key] !== after[key]) {
+        changed[String(key)] = { from: before[key], to: after[key] };
+      }
+    });
+    if (Object.keys(changed).length > 0) {
+      console.log('[FinishFirst] Settings updated:', changed);
+    }
     return { success: true };
   },
 

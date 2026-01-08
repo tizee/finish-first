@@ -53,7 +53,7 @@
     "description": "Completed tasks label"
   },
   "popup_focus_time": {
-    "message": "Focus Time",
+    "message": "Total Time",
     "description": "Focus time label"
   },
 
@@ -95,7 +95,7 @@
     "description": "Whitelist section title"
   },
   "options_whitelist_desc": {
-    "message": "Add URL patterns (regex) for sites allowed during focus mode",
+    "message": "Patterns are absolute URL regular expressions. * matches zero or more characters (e.g., http{s}?://www.bilibili.com/*)",
     "description": "Whitelist description"
   },
   "options_add_pattern": {
@@ -103,20 +103,12 @@
     "description": "Add pattern button"
   },
   "options_pattern_placeholder": {
-    "message": "e.g., ^https://docs\\.google\\.com/.*",
+    "message": "e.g., http{s}?://www.bilibili.com/*",
     "description": "Pattern input placeholder"
   },
   "options_section_behavior": {
     "message": "Behavior",
     "description": "Behavior section title"
-  },
-  "options_break_duration": {
-    "message": "Break Duration (minutes)",
-    "description": "Break duration setting"
-  },
-  "options_break_desc": {
-    "message": "Free browsing time after completing a task",
-    "description": "Break duration description"
   },
   "options_strict_mode": {
     "message": "Strict Mode",

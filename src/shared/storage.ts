@@ -50,7 +50,6 @@ export interface DailyStats {
  */
 export interface StorageSchema {
   settings: {
-    breakDuration: number; // minutes of free browsing after task completion
     strictMode: boolean; // prevent disabling focus without completing
     theme: 'light' | 'dark' | 'system';
   };
@@ -66,23 +65,72 @@ export interface StorageSchema {
 const defaultWhitelist: WhitelistPattern[] = [
   {
     id: 'chrome-internal',
-    pattern: '^chrome://',
+    pattern: 'chrome://*',
     label: 'Chrome Internal Pages',
     enabled: true,
   },
   {
     id: 'chrome-extension',
-    pattern: '^chrome-extension://',
+    pattern: 'chrome-extension://*/*',
     label: 'Chrome Extensions',
     enabled: true,
   },
   {
     id: 'edge-internal',
-    pattern: '^edge://',
+    pattern: 'edge://*',
     label: 'Edge Internal Pages',
     enabled: true,
   },
+  {
+    id: 'moz-extension',
+    pattern: 'moz-extension://*/*',
+    label: 'Firefox Extensions',
+    enabled: true,
+  },
 ];
+
+const legacyDefaultPatterns: Record<string, { legacy: string[]; current: string }> = {
+  'chrome-internal': { legacy: ['^chrome://'], current: 'chrome://*' },
+  'chrome-extension': { legacy: ['^chrome-extension://'], current: 'chrome-extension://*/*' },
+  'edge-internal': { legacy: ['^edge://'], current: 'edge://*' },
+};
+
+function normalizeWhitelist(
+  stored: WhitelistPattern[] | undefined
+): { list: WhitelistPattern[]; changed: boolean } {
+  if (!stored) {
+    return { list: defaultWhitelist, changed: true };
+  }
+
+  const seen = new Set<string>();
+  const list: WhitelistPattern[] = [];
+  let changed = false;
+
+  for (const pattern of stored) {
+    const legacy = legacyDefaultPatterns[pattern.id];
+    const updated =
+      legacy && legacy.legacy.includes(pattern.pattern)
+        ? { ...pattern, pattern: legacy.current }
+        : pattern;
+    if (updated !== pattern) {
+      changed = true;
+    }
+    if (!seen.has(updated.id)) {
+      list.push(updated);
+      seen.add(updated.id);
+    }
+  }
+
+  for (const defaults of defaultWhitelist) {
+    if (!seen.has(defaults.id)) {
+      list.push(defaults);
+      seen.add(defaults.id);
+      changed = true;
+    }
+  }
+
+  return { list, changed };
+}
 
 /**
  * Get today's date string
@@ -96,7 +144,6 @@ function getTodayString(): string {
  */
 export const storageDefaults: StorageSchema = {
   settings: {
-    breakDuration: 5,
     strictMode: false,
     theme: 'system',
   },
@@ -142,6 +189,28 @@ export async function getStorageWithDefault<K extends keyof StorageSchema>(
       await setStorage('stats', freshStats);
       return freshStats as StorageSchema[K];
     }
+  }
+
+  if (key === 'focusSession' && result) {
+    const session = result as FocusSession;
+    if (session.active && !session.currentGoal) {
+      const normalized: FocusSession = {
+        ...session,
+        active: false,
+        startedAt: null,
+        breakUntil: null,
+      };
+      await setStorage('focusSession', normalized);
+      return normalized as StorageSchema[K];
+    }
+  }
+
+  if (key === 'whitelist') {
+    const normalized = normalizeWhitelist(result as WhitelistPattern[] | undefined);
+    if (normalized.changed) {
+      await setStorage('whitelist', normalized.list);
+    }
+    return normalized.list as StorageSchema[K];
   }
 
   return result ?? storageDefaults[key];

@@ -9,7 +9,6 @@ import { patternTemplates, isValidPattern } from '../shared/whitelist';
 import type { WhitelistPattern } from '../shared/storage';
 
 // DOM elements
-const breakDurationInput = document.getElementById('breakDuration') as HTMLInputElement;
 const strictModeToggle = document.getElementById('strictMode') as HTMLInputElement;
 const patternInput = document.getElementById('patternInput') as HTMLInputElement;
 const labelInput = document.getElementById('labelInput') as HTMLInputElement;
@@ -55,7 +54,6 @@ function showSavedMessage(): void {
 async function loadSettings(): Promise<void> {
   const { settings } = await sendMessage({ type: 'GET_SETTINGS' });
 
-  breakDurationInput.value = String(settings.breakDuration);
   strictModeToggle.checked = settings.strictMode;
 }
 
@@ -66,7 +64,6 @@ async function saveSettings(): Promise<void> {
   await sendMessage({
     type: 'UPDATE_SETTINGS',
     payload: {
-      breakDuration: parseInt(breakDurationInput.value, 10) || 5,
       strictMode: strictModeToggle.checked,
     },
   });
@@ -117,7 +114,11 @@ function createWhitelistItem(pattern: WhitelistPattern): HTMLElement {
   toggleLabel.appendChild(toggleSlider);
 
   // Delete button (only for non-default patterns)
-  if (!pattern.id.startsWith('chrome-') && !pattern.id.startsWith('edge-')) {
+  const isProtected =
+    pattern.id.startsWith('chrome-') ||
+    pattern.id.startsWith('edge-') ||
+    pattern.id === 'moz-extension';
+  if (!isProtected) {
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'btn btn-danger';
     deleteBtn.textContent = '✕';
@@ -181,7 +182,7 @@ async function addPattern(pattern: string, label: string): Promise<void> {
   }
 
   if (!isValidPattern(pattern)) {
-    alert('Invalid regex pattern. Please check the syntax.');
+    alert('Invalid pattern. Use an absolute URL expression like http{s}?://example.com/*');
     return;
   }
 
@@ -234,7 +235,6 @@ async function init(): Promise<void> {
   renderTemplates();
 
   // Set up event listeners
-  breakDurationInput.addEventListener('change', saveSettings);
   strictModeToggle.addEventListener('change', saveSettings);
 
   addPatternBtn.addEventListener('click', () => {

@@ -34,7 +34,7 @@ export type MessageType =
  */
 export interface MessageResponseMap {
   START_FOCUS: { success: boolean; session?: FocusSession };
-  COMPLETE_TASK: { success: boolean; breakUntil?: number };
+  COMPLETE_TASK: { success: boolean };
   CANCEL_FOCUS: { success: boolean };
   GET_FOCUS_STATE: { session: FocusSession; isBlocking: boolean };
   ADD_WHITELIST: { success: boolean; pattern?: WhitelistPattern };

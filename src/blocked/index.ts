@@ -21,6 +21,7 @@ const quotes = [
 const icon = document.getElementById('icon')!;
 const title = document.getElementById('title')!;
 const subtitle = document.getElementById('subtitle')!;
+const statusPill = document.getElementById('statusPill')!;
 const goalCard = document.getElementById('goalCard')!;
 const goalLabel = document.getElementById('goalLabel')!;
 const goalText = document.getElementById('goalText')!;
@@ -67,6 +68,9 @@ async function init(): Promise<void> {
 async function loadFocusState(): Promise<void> {
   const { session } = await sendMessage({ type: 'GET_FOCUS_STATE' });
 
+  statusPill.textContent = 'Focus Mode';
+  statusPill.classList.remove('break');
+
   if (session.breakUntil && Date.now() < session.breakUntil) {
     // On break - shouldn't be here, redirect back
     showBreakMode(session.breakUntil);
@@ -101,6 +105,9 @@ function showBreakMode(breakUntil: number): void {
 
   goalCard.classList.add('break-mode');
   goalLabel.textContent = 'Break Time Remaining';
+  goalText.classList.remove('no-goal');
+  statusPill.textContent = 'On Break';
+  statusPill.classList.add('break');
 
   completeBtn.textContent = '→ Continue to Site';
   completeBtn.onclick = () => {
@@ -135,8 +142,7 @@ function updateBreakTimer(breakUntil: number): void {
   // Clear and rebuild safely
   goalText.textContent = '';
   const timerSpan = document.createElement('span');
-  timerSpan.style.fontSize = '32px';
-  timerSpan.style.color = '#22c55e';
+  timerSpan.className = 'break-countdown';
   timerSpan.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
   goalText.appendChild(timerSpan);
 }
@@ -150,8 +156,12 @@ async function handleComplete(): Promise<void> {
 
   const result = await sendMessage({ type: 'COMPLETE_TASK' });
 
-  if (result.success && result.breakUntil) {
-    showBreakMode(result.breakUntil);
+  if (result.success) {
+    if (originalUrl) {
+      window.location.href = originalUrl;
+      return;
+    }
+    window.history.back();
   } else {
     completeBtn.disabled = false;
     completeBtn.textContent = '✓ I\'ve Completed My Task';

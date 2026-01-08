@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title data-i18n="options_title">FinishFirst Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
@@ -12,72 +15,162 @@
     }
 
     :root {
-      --bg-color: #0f0f23;
-      --bg-secondary: #1a1a2e;
-      --text-color: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-color: #334155;
-      --accent-color: #4f46e5;
-      --accent-hover: #6366f1;
-      --success-color: #22c55e;
-      --danger-color: #ef4444;
+      --bg-cream: #FDF8F3;
+      --bg-warm: #F2E8DD;
+      --bg-card: #FFFFFF;
+      --text-primary: #2D2A26;
+      --text-secondary: #6B635A;
+      --text-muted: #9C948A;
+      --accent-terracotta: #C4704B;
+      --accent-terracotta-dark: #B85F3A;
+      --accent-sage: #7B9E87;
+      --accent-amber: #D4A24C;
+      --danger: #C75D5D;
+      --border-soft: rgba(45, 42, 38, 0.08);
+      --shadow-soft: 0 6px 18px rgba(45, 42, 38, 0.08);
+      --shadow-medium: 0 10px 30px rgba(45, 42, 38, 0.12);
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     body {
-      max-width: 700px;
-      margin: 0 auto;
-      padding: 40px 20px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 40px 24px 80px;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       font-size: 14px;
-      background: var(--bg-color);
-      color: var(--text-color);
-      line-height: 1.5;
+      background: radial-gradient(circle at top left, #FFF3E6 0%, #F7EEE4 45%, #F0E1D1 100%);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      opacity: 0.02;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+      animation: fadeInUp 0.4s ease-out;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent-terracotta) 0%, #E3A27F 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .brand-kicker {
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 4px;
     }
 
     h1 {
+      font-family: 'Fraunces', Georgia, serif;
       font-size: 28px;
       font-weight: 700;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
     }
 
     .subtitle {
-      color: var(--text-muted);
-      margin-bottom: 32px;
+      color: var(--text-secondary);
+      margin: 6px 0 26px;
+      max-width: 640px;
     }
 
     /* Sections */
     .section {
-      margin-bottom: 32px;
+      margin-bottom: 24px;
+      padding: 22px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 20px;
+      box-shadow: var(--shadow-soft);
     }
 
     .section-title {
       font-size: 12px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.16em;
       color: var(--text-muted);
       margin-bottom: 16px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+    }
+
+    .section-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      background: var(--bg-warm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
     }
 
     /* Settings card */
     .setting {
       padding: 16px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
+      background: var(--bg-cream);
+      border: 1px solid var(--border-soft);
+      border-radius: 14px;
       margin-bottom: 12px;
+    }
+
+    .setting:last-child {
+      margin-bottom: 0;
     }
 
     .setting-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 16px;
     }
 
     .setting-info {
@@ -91,7 +184,7 @@
 
     .setting-desc {
       font-size: 13px;
-      color: var(--text-muted);
+      color: var(--text-secondary);
     }
 
     .setting-control {
@@ -101,42 +194,47 @@
     /* Toggle switch */
     .toggle {
       position: relative;
-      width: 44px;
-      height: 24px;
+      width: 46px;
+      height: 26px;
+      display: inline-block;
     }
 
     .toggle input {
       opacity: 0;
-      width: 0;
-      height: 0;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      cursor: pointer;
     }
 
     .toggle-slider {
       position: absolute;
       cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: var(--border-color);
+      inset: 0;
+      background-color: var(--bg-warm);
       transition: 0.3s;
-      border-radius: 24px;
+      border-radius: 999px;
+      border: 1px solid var(--border-soft);
     }
 
     .toggle-slider:before {
       position: absolute;
       content: "";
-      height: 18px;
-      width: 18px;
+      height: 20px;
+      width: 20px;
       left: 3px;
-      bottom: 3px;
+      top: 2px;
       background-color: white;
       transition: 0.3s;
       border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(45, 42, 38, 0.15);
     }
 
     .toggle input:checked + .toggle-slider {
-      background-color: var(--accent-color);
+      background: linear-gradient(135deg, var(--accent-sage) 0%, #6A8A75 100%);
+      border-color: rgba(123, 158, 135, 0.4);
     }
 
     .toggle input:checked + .toggle-slider:before {
@@ -145,58 +243,62 @@
 
     /* Number input */
     input[type="number"] {
-      width: 80px;
+      width: 90px;
       padding: 8px 12px;
       font-size: 14px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      background: var(--bg-color);
-      color: var(--text-color);
+      border: 1px solid var(--border-soft);
+      border-radius: 999px;
+      background: var(--bg-card);
+      color: var(--text-primary);
       text-align: center;
+      box-shadow: inset 0 1px 2px rgba(45, 42, 38, 0.08);
     }
 
     input[type="number"]:focus {
       outline: none;
-      border-color: var(--accent-color);
+      border-color: var(--accent-terracotta);
+      box-shadow: 0 0 0 3px rgba(196, 112, 75, 0.12);
     }
 
     /* Whitelist patterns */
     .whitelist-container {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
+      background: var(--bg-warm);
+      border: 1px solid var(--border-soft);
+      border-radius: 16px;
       overflow: hidden;
     }
 
     .whitelist-header {
-      padding: 16px;
-      border-bottom: 1px solid var(--border-color);
+      padding: 18px;
+      border-bottom: 1px dashed var(--border-soft);
     }
 
     .whitelist-header p {
-      color: var(--text-muted);
+      color: var(--text-secondary);
       font-size: 13px;
       margin-bottom: 12px;
     }
 
     .add-pattern-row {
       display: flex;
-      gap: 8px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .add-pattern-row input {
-      flex: 1;
+      flex: 1 1 220px;
       padding: 10px 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      background: var(--bg-color);
-      color: var(--text-color);
+      border: 1px solid var(--border-soft);
+      border-radius: 10px;
+      background: var(--bg-card);
+      color: var(--text-primary);
       font-size: 14px;
     }
 
     .add-pattern-row input:focus {
       outline: none;
-      border-color: var(--accent-color);
+      border-color: var(--accent-terracotta);
+      box-shadow: 0 0 0 3px rgba(196, 112, 75, 0.12);
     }
 
     .add-pattern-row input::placeholder {
@@ -206,42 +308,53 @@
     .btn {
       padding: 10px 16px;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
 
     .btn-primary {
-      background: var(--accent-color);
+      background: linear-gradient(135deg, var(--accent-terracotta) 0%, var(--accent-terracotta-dark) 100%);
       color: white;
+      box-shadow: 0 6px 16px rgba(196, 112, 75, 0.25);
     }
 
     .btn-primary:hover {
-      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(196, 112, 75, 0.3);
     }
 
     .btn-danger {
       background: transparent;
-      color: var(--danger-color);
-      padding: 4px 8px;
+      color: var(--danger);
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(199, 93, 93, 0.3);
     }
 
     .btn-danger:hover {
-      background: rgba(239, 68, 68, 0.1);
+      background: rgba(199, 93, 93, 0.08);
+      border-color: var(--danger);
     }
 
     .whitelist-list {
-      max-height: 300px;
+      max-height: 320px;
       overflow-y: auto;
     }
 
     .whitelist-item {
       display: flex;
       align-items: center;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border-color);
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(45, 42, 38, 0.06);
+      background: var(--bg-card);
     }
 
     .whitelist-item:last-child {
@@ -258,14 +371,14 @@
     }
 
     .whitelist-item-label {
-      font-weight: 500;
+      font-weight: 600;
       margin-bottom: 2px;
     }
 
     .whitelist-item-pattern {
       font-size: 12px;
       color: var(--text-muted);
-      font-family: monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       word-break: break-all;
     }
 
@@ -280,6 +393,7 @@
       padding: 24px;
       text-align: center;
       color: var(--text-muted);
+      background: var(--bg-card);
     }
 
     /* Templates */
@@ -293,17 +407,18 @@
     .template-btn {
       padding: 6px 12px;
       font-size: 12px;
-      background: var(--bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      color: var(--text-muted);
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: 999px;
+      color: var(--text-secondary);
       cursor: pointer;
       transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
     }
 
     .template-btn:hover {
-      border-color: var(--accent-color);
-      color: var(--text-color);
+      border-color: var(--accent-terracotta);
+      color: var(--text-primary);
     }
 
     /* Save message */
@@ -312,77 +427,116 @@
       bottom: 24px;
       right: 24px;
       padding: 12px 20px;
-      background: var(--success-color);
+      background: linear-gradient(135deg, var(--accent-sage) 0%, #6A8A75 100%);
       color: white;
-      border-radius: 8px;
-      font-weight: 500;
+      border-radius: 999px;
+      font-weight: 600;
       opacity: 0;
       transform: translateY(10px);
       transition: opacity 0.3s, transform 0.3s;
       z-index: 100;
+      box-shadow: var(--shadow-medium);
     }
 
     .saved-msg.visible {
       opacity: 1;
       transform: translateY(0);
     }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 32px 16px 64px;
+      }
+
+      .page-header {
+        gap: 16px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .section {
+        padding: 18px;
+      }
+
+      .setting-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .setting-control {
+        margin-left: 0;
+      }
+
+      .saved-msg {
+        right: 16px;
+        left: 16px;
+        text-align: center;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>🎯 FinishFirst Settings</h1>
-  <p class="subtitle" data-i18n="options_subtitle">Configure your focus settings and whitelist patterns</p>
-
-  <!-- Behavior Settings -->
-  <div class="section">
-    <div class="section-title" data-i18n="options_section_behavior">⚙️ Behavior</div>
-
-    <div class="setting">
-      <div class="setting-row">
-        <div class="setting-info">
-          <div class="setting-title" data-i18n="options_break_duration">Break Duration (minutes)</div>
-          <div class="setting-desc" data-i18n="options_break_desc">Free browsing time after completing a task</div>
+  <div class="page">
+    <header class="page-header">
+      <div class="brand">
+        <div class="brand-icon">🎯</div>
+        <div>
+          <div class="brand-kicker">FinishFirst</div>
+          <h1 data-i18n="options_title">FinishFirst Settings</h1>
         </div>
-        <div class="setting-control">
-          <input type="number" id="breakDuration" min="1" max="60" value="5">
+      </div>
+    </header>
+
+    <p class="subtitle" data-i18n="options_subtitle">Configure your focus settings and whitelist patterns</p>
+
+    <!-- Behavior Settings -->
+    <div class="section">
+      <div class="section-title">
+        <span class="section-icon">⚙️</span>
+        <span data-i18n="options_section_behavior">Behavior</span>
+      </div>
+
+      <div class="setting">
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-title" data-i18n="options_strict_mode">Strict Mode</div>
+            <div class="setting-desc" data-i18n="options_strict_desc">Prevent disabling focus mode without completing task</div>
+          </div>
+          <div class="setting-control">
+            <label class="toggle">
+              <input type="checkbox" id="strictMode">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="setting">
-      <div class="setting-row">
-        <div class="setting-info">
-          <div class="setting-title" data-i18n="options_strict_mode">Strict Mode</div>
-          <div class="setting-desc" data-i18n="options_strict_desc">Prevent disabling focus mode without completing task</div>
-        </div>
-        <div class="setting-control">
-          <label class="toggle">
-            <input type="checkbox" id="strictMode">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
+    <!-- Whitelist Patterns -->
+    <div class="section">
+      <div class="section-title">
+        <span class="section-icon">🔓</span>
+        <span data-i18n="options_section_whitelist">Whitelist Patterns</span>
       </div>
-    </div>
-  </div>
 
-  <!-- Whitelist Patterns -->
-  <div class="section">
-    <div class="section-title" data-i18n="options_section_whitelist">🔓 Whitelist Patterns</div>
-
-    <div class="whitelist-container">
-      <div class="whitelist-header">
-        <p data-i18n="options_whitelist_desc">Add URL patterns (regex) for sites allowed during focus mode</p>
-        <div class="add-pattern-row">
-          <input type="text" id="patternInput" placeholder="^https://docs\.google\.com/.*">
-          <input type="text" id="labelInput" placeholder="Label (e.g., Google Docs)" style="max-width: 180px;">
-          <button class="btn btn-primary" id="addPatternBtn" data-i18n="options_add_pattern">Add</button>
+      <div class="whitelist-container">
+        <div class="whitelist-header">
+          <p data-i18n="options_whitelist_desc">Add URL patterns (regex) for sites allowed during focus mode</p>
+          <div class="add-pattern-row">
+            <input type="text" id="patternInput" data-i18n="options_pattern_placeholder" placeholder="http{s}?://www.bilibili.com/*">
+            <input type="text" id="labelInput" placeholder="Label (e.g., Google Docs)" style="max-width: 180px;">
+            <button class="btn btn-primary" id="addPatternBtn" data-i18n="options_add_pattern">Add</button>
+          </div>
+          <div class="templates" id="templates">
+            <!-- Populated by JS -->
+          </div>
         </div>
-        <div class="templates" id="templates">
+
+        <div class="whitelist-list" id="whitelistList">
           <!-- Populated by JS -->
         </div>
-      </div>
-
-      <div class="whitelist-list" id="whitelistList">
-        <!-- Populated by JS -->
       </div>
     </div>
   </div>

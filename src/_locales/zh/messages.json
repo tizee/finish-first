@@ -40,7 +40,7 @@
     "message": "已完成"
   },
   "popup_focus_time": {
-    "message": "专注时间"
+    "message": "总时长"
   },
 
   "blocked_title": {
@@ -72,22 +72,16 @@
     "message": "白名单规则"
   },
   "options_whitelist_desc": {
-    "message": "添加专注模式下允许访问的网址规则（正则表达式）"
+    "message": "规则是绝对 URL 正则表达式，* 匹配零个或多个字符（例如：http{s}?://www.bilibili.com/*）"
   },
   "options_add_pattern": {
     "message": "添加规则"
   },
   "options_pattern_placeholder": {
-    "message": "例如: ^https://docs\\.google\\.com/.*"
+    "message": "例如: http{s}?://www.bilibili.com/*"
   },
   "options_section_behavior": {
     "message": "行为设置"
-  },
-  "options_break_duration": {
-    "message": "休息时长（分钟）"
-  },
-  "options_break_desc": {
-    "message": "完成任务后的自由浏览时间"
   },
   "options_strict_mode": {
     "message": "严格模式"

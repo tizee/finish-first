@@ -1,9 +1,26 @@
 /**
  * Whitelist URL Pattern Matching
- * Utilities for checking URLs against whitelist regex patterns
+ * Utilities for checking URLs against whitelist URL regular expressions
+ * (URLPattern syntax)
  */
 
+import 'urlpattern-polyfill';
 import type { WhitelistPattern } from './storage';
+
+/**
+ * Compile a pattern into a URLPattern, returning null for invalid patterns.
+ * Only absolute URL patterns are accepted (no baseURL provided).
+ */
+function compilePattern(pattern: string): URLPattern | null {
+  const trimmed = pattern.trim();
+  if (!trimmed) return null;
+
+  try {
+    return new URLPattern(trimmed, { ignoreCase: true });
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Check if a URL matches any enabled whitelist pattern
@@ -12,14 +29,15 @@ export function isUrlWhitelisted(url: string, patterns: WhitelistPattern[]): boo
   for (const pattern of patterns) {
     if (!pattern.enabled) continue;
 
-    try {
-      const regex = new RegExp(pattern.pattern, 'i');
-      if (regex.test(url)) {
-        return true;
-      }
-    } catch {
-      // Invalid regex pattern, skip
-      console.warn(`[FinishFirst] Invalid regex pattern: ${pattern.pattern}`);
+    const urlPattern = compilePattern(pattern.pattern);
+    if (!urlPattern) {
+      // Invalid pattern, skip
+      console.warn(`[FinishFirst] Invalid pattern: ${pattern.pattern}`);
+      continue;
+    }
+
+    if (urlPattern.test(url)) {
+      return true;
     }
   }
   return false;
@@ -29,12 +47,7 @@ export function isUrlWhitelisted(url: string, patterns: WhitelistPattern[]): boo
  * Validate a regex pattern string
  */
 export function isValidPattern(pattern: string): boolean {
-  try {
-    new RegExp(pattern);
-    return true;
-  } catch {
-    return false;
-  }
+  return compilePattern(pattern) !== null;
 }
 
 /**
@@ -43,22 +56,22 @@ export function isValidPattern(pattern: string): boolean {
 export const patternTemplates = [
   {
     label: 'Google Docs',
-    pattern: '^https://docs\\.google\\.com/.*',
+    pattern: 'http{s}?://docs.google.com/*',
   },
   {
     label: 'GitHub',
-    pattern: '^https://github\\.com/.*',
+    pattern: 'http{s}?://github.com/*',
   },
   {
     label: 'Stack Overflow',
-    pattern: '^https://stackoverflow\\.com/.*',
+    pattern: 'http{s}?://stackoverflow.com/*',
   },
   {
     label: 'MDN Web Docs',
-    pattern: '^https://developer\\.mozilla\\.org/.*',
+    pattern: 'http{s}?://developer.mozilla.org/*',
   },
   {
     label: 'Notion',
-    pattern: '^https://www\\.notion\\.so/.*',
+    pattern: 'http{s}?://www.notion.so/*',
   },
 ];

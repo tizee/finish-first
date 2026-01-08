@@ -50,6 +50,7 @@ export default defineConfig(({ mode }) => {
             { src: 'popup/popup.html', dest: 'popup/popup.html' },
             { src: 'options/options.html', dest: 'options/options.html' },
             { src: 'blocked/blocked.html', dest: 'blocked/blocked.html' },
+            { src: 'background/background.html', dest: 'background/background.html' },
           ];
 
           htmlFiles.forEach(({ src, dest }) => {
