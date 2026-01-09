@@ -1,4 +1,4 @@
-.PHONY: install-deps chrome firefox all test clean
+.PHONY: install-deps chrome firefox all test clean install-firefox
 
 install-deps:
 	pnpm install
@@ -19,3 +19,6 @@ test-watch:
 
 clean:
 	rm -rf dist dist-chrome dist-firefox node_modules
+
+install-firefox: firefox
+	open -a "Firefox Developer Edition" dist/*.xpi

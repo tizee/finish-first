@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "pnpm build:chrome && pnpm build:firefox",
     "build:chrome": "tsc && vite build --mode chrome",
-    "build:firefox": "tsc && vite build --mode firefox && web-ext build --source-dir=./dist-firefox -a=./dist --overwrite-dest",
+    "build:firefox": "tsc && vite build --mode firefox && web-ext build --source-dir=./dist-firefox -a=./dist --overwrite-dest && cd dist && for f in *.zip; do mv \"$f\" \"${f%.zip}.xpi\"; done",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
