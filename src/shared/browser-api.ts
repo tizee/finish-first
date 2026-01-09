@@ -82,6 +82,16 @@ export const browserAPI = {
    * Tab management APIs
    */
   tabs: {
+    get: (tabId: number): Promise<chrome.tabs.Tab> => {
+      if (isFirefox) {
+        return browser.tabs.get(tabId);
+      }
+      if (typeof chrome !== 'undefined' && chrome.tabs) {
+        return chrome.tabs.get(tabId);
+      }
+      return Promise.reject(new Error('Tabs API not available'));
+    },
+
     query: (queryInfo: chrome.tabs.QueryInfo): Promise<chrome.tabs.Tab[]> => {
       if (isFirefox) {
         return browser.tabs.query(queryInfo);
@@ -100,6 +110,26 @@ export const browserAPI = {
         return chrome.tabs.update(tabId, updateProperties);
       }
       return Promise.reject(new Error('Tabs API not available'));
+    },
+
+    onActivated: {
+      addListener: (callback: (activeInfo: { tabId: number; windowId: number }) => void): void => {
+        if (isFirefox) {
+          browser.tabs.onActivated.addListener(callback);
+        } else if (typeof chrome !== 'undefined' && chrome.tabs) {
+          chrome.tabs.onActivated.addListener(callback);
+        }
+      },
+    },
+
+    onUpdated: {
+      addListener: (callback: (tabId: number, changeInfo: { status?: string; url?: string }, tab: chrome.tabs.Tab) => void): void => {
+        if (isFirefox) {
+          browser.tabs.onUpdated.addListener(callback as any);
+        } else if (typeof chrome !== 'undefined' && chrome.tabs) {
+          chrome.tabs.onUpdated.addListener(callback as any);
+        }
+      },
     },
   },
 

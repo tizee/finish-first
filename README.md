@@ -14,7 +14,17 @@ FinishFirst is a browser extension for ADHD-friendly focus. Set a single goal, b
 
 - **Chrome**: Manifest V3 service worker
 - **Firefox**: Manifest V2 background page (module script)
-- **URLPattern**: Uses `urlpattern-polyfill` for Firefox compatibility
+
+### Browser Requirements
+
+This extension uses the [URLPattern API](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API) with the `ignoreCase` option:
+
+| Browser | Minimum Version |
+|---------|-----------------|
+| Chrome  | 107+            |
+| Edge    | 107+            |
+| Firefox | 142+            |
+| Safari  | 26+             |
 
 ## Getting Started
 

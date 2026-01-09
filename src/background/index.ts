@@ -57,6 +57,27 @@ async function shouldBlockUrl(url: string): Promise<{ blocked: boolean; reason?:
     return { blocked: false, reason: 'blocked-page' };
   }
 
+  // Handle special new tab pages
+  if (url === 'about:newtab' || url === 'chrome://newtab/' || url === 'edge://newtab/') {
+    // Special handling for new tab pages
+    // Only block if explicitly not whitelisted
+    const whitelist = await getStorageWithDefault('whitelist');
+    const isWhitelisted = isUrlWhitelisted(url, whitelist);
+
+    if (isWhitelisted) {
+      return { blocked: false, reason: 'whitelisted' };
+    }
+
+    // For new tab pages, we need to check if blocking is active
+    if (!(await shouldBlock())) {
+      return { blocked: false, reason: 'focus-inactive' };
+    }
+
+    // Block new tab only if there's an active focus session
+    // But we need to be careful not to break the browser
+    return { blocked: true, reason: 'newtab-blocked' };
+  }
+
   // Check if blocking is active
   if (!(await shouldBlock())) {
     return { blocked: false, reason: 'focus-inactive' };
@@ -98,7 +119,7 @@ async function handleNavigation(
     await updateStorage('stats', { blockedAttempts: stats.blockedAttempts + 1 });
 
     // Redirect to blocked page
-    await chrome.tabs.update(details.tabId, {
+    await browserAPI.tabs.update(details.tabId, {
       url: getBlockedPageUrl(details.url),
     });
   }
@@ -146,6 +167,35 @@ async function startFocus(goalText: string): Promise<FocusSession> {
 
   console.log('[FinishFirst] Focus started:', goal.text);
   return session;
+}
+
+/**
+ * Check current tab and block if needed when focus starts
+ */
+async function checkCurrentTabOnFocusStart(): Promise<void> {
+  try {
+    const [currentTab] = await browserAPI.tabs.query({ active: true, currentWindow: true });
+    if (!currentTab || !currentTab.url) return;
+
+    // Skip special pages
+    if (currentTab.url.startsWith('chrome://') ||
+        currentTab.url.startsWith('about:') ||
+        currentTab.url.startsWith('edge://') ||
+        currentTab.url.startsWith('moz-extension://')) {
+      return;
+    }
+
+    const { blocked } = await shouldBlockUrl(currentTab.url);
+    if (blocked && currentTab.id) {
+      // Block the current tab
+      await browserAPI.tabs.update(currentTab.id, {
+        url: getBlockedPageUrl(currentTab.url),
+      });
+      console.log('[FinishFirst] Blocked current tab after focus started:', currentTab.url);
+    }
+  } catch (error) {
+    console.error('[FinishFirst] Error checking current tab on focus start:', error);
+  }
 }
 
 /**
@@ -213,6 +263,94 @@ async function cancelFocus(): Promise<void> {
   console.log('[FinishFirst] Focus cancelled');
 }
 
+/**
+ * Handle tab activation - check if we need to block
+ */
+async function handleTabActivated(activeInfo: { tabId: number; windowId: number }): Promise<void> {
+  console.log('[FinishFirst] Tab activated:', activeInfo.tabId);
+  try {
+    // First check if blocking should be active at all
+    const blockingActive = await shouldBlock();
+    console.log('[FinishFirst] Blocking active:', blockingActive);
+    if (!blockingActive) {
+      return;
+    }
+
+    const tab = await browserAPI.tabs.get(activeInfo.tabId);
+    console.log('[FinishFirst] Tab info:', tab?.id, tab?.url, tab?.status);
+
+    if (!tab) {
+      console.log('[FinishFirst] Tab not found');
+      return;
+    }
+
+    // If URL is not available yet, wait for tab to finish loading
+    if (!tab.url) {
+      console.log('[FinishFirst] Tab URL not available, waiting for load');
+      return;
+    }
+
+    // Skip special pages and extension pages
+    if (tab.url.startsWith('chrome://') ||
+        tab.url.startsWith('about:') ||
+        tab.url.startsWith('edge://') ||
+        tab.url.startsWith('moz-extension://') ||
+        tab.url.includes('blocked/blocked.html')) {
+      console.log('[FinishFirst] Skipping special page:', tab.url);
+      return;
+    }
+
+    // Check if this tab should be blocked
+    const { blocked, reason } = await shouldBlockUrl(tab.url);
+    console.log('[FinishFirst] Should block:', blocked, 'reason:', reason, 'url:', tab.url);
+
+    if (blocked) {
+      // Block the tab - redirect to blocked page
+      await browserAPI.tabs.update(tab.id!, {
+        url: getBlockedPageUrl(tab.url),
+      });
+      console.log('[FinishFirst] Blocked tab on activation:', tab.url);
+    }
+  } catch (error) {
+    console.error('[FinishFirst] Error handling tab activation:', error);
+  }
+}
+
+/**
+ * Handle tab update - check if we need to block
+ */
+async function handleTabUpdate(_tabId: number, changeInfo: { status?: string; url?: string }, tab: chrome.tabs.Tab): Promise<void> {
+  try {
+    // Only check when tab finishes loading and URL changes
+    if (changeInfo.status !== 'complete' || !changeInfo.url) return;
+
+    // First check if blocking should be active at all
+    if (!(await shouldBlock())) {
+      return;
+    }
+
+    if (tab.active) return; // Skip if tab is already active (handled by handleTabActivated)
+
+    // Skip special pages and extension pages
+    if (changeInfo.url.startsWith('chrome://') ||
+        changeInfo.url.startsWith('about:') ||
+        changeInfo.url.startsWith('edge://') ||
+        changeInfo.url.startsWith('moz-extension://') ||
+        changeInfo.url.includes('blocked/blocked.html')) {
+      return;
+    }
+
+    // Note: tab.setIcon is not available in all browsers, so we'll skip this feature
+    // Just log the fact that this tab would be blocked if activated
+    const { blocked } = await shouldBlockUrl(changeInfo.url);
+    if (blocked) {
+      console.log('[FinishFirst] Background tab would be blocked if activated:', changeInfo.url);
+    }
+  } catch (error) {
+    console.error('[FinishFirst] Error handling tab update:', error);
+  }
+}
+
 // Extension lifecycle
 chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === 'install') {
@@ -226,10 +364,18 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 // Navigation listener for blocking
 chrome.webNavigation.onCommitted.addListener(handleNavigation);
 
+// Tab activation listener for blocking
+browserAPI.tabs.onActivated.addListener(handleTabActivated);
+
+// Tab update listener for blocking background tabs
+browserAPI.tabs.onUpdated.addListener(handleTabUpdate);
+
 // Message handlers
 onMessage({
   START_FOCUS: async ({ goalText }) => {
     const session = await startFocus(goalText);
+    // Check current tab and block if needed
+    await checkCurrentTabOnFocusStart();
     return { success: true, session };
   },
 

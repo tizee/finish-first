@@ -182,7 +182,7 @@ async function addPattern(pattern: string, label: string): Promise<void> {
   }
 
   if (!isValidPattern(pattern)) {
-    alert('Invalid pattern. Use an absolute URL expression like http{s}?://example.com/*');
+    alert('Invalid pattern. Supported formats include:\n- Full URLs: https://example.com/*\n- Domain only: example.com\n- Subdomains: *.example.com\n- Path patterns: /app/*');
     return;
   }
 

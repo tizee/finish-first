@@ -60,6 +60,14 @@ async function init(): Promise<void> {
   // Set up event listeners
   completeBtn.addEventListener('click', handleComplete);
   backBtn.addEventListener('click', handleBack);
+
+  // Listen for visibility changes - only redirect when user switches to this tab
+  // This implements lazy loading: blocked pages only redirect when user actually views them
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  // Also listen for storage changes, but only redirect if this page is currently visible
+  // This handles the case where user is viewing this blocked page when task is completed elsewhere
+  chrome.storage.local.onChanged.addListener(handleStorageChangeIfVisible);
 }
 
 /**
@@ -77,6 +85,16 @@ async function loadFocusState(): Promise<void> {
     return;
   }
 
+  if (!session.active || !session.currentGoal) {
+    // Session already ended, redirect to original URL
+    if (originalUrl) {
+      window.location.href = originalUrl;
+      return;
+    }
+    window.history.back();
+    return;
+  }
+
   if (session.currentGoal) {
     goalText.textContent = session.currentGoal.text;
     goalText.classList.remove('no-goal');
@@ -87,10 +105,70 @@ async function loadFocusState(): Promise<void> {
   }
 
   // Show focus duration if available
+  updateFocusDuration(session);
+
+  // Start updating focus duration
+  setInterval(() => updateFocusDuration(session), 60000);
+}
+
+/**
+ * Update focus duration display
+ */
+function updateFocusDuration(session: any): void {
   if (session.startedAt) {
     const minutes = Math.floor((Date.now() - session.startedAt) / 60000);
     if (minutes > 0) {
       goalLabel.textContent = `Your Goal (${minutes} min focused)`;
+    }
+  }
+}
+
+/**
+ * Handle visibility change - redirect only when user switches to this tab
+ * This implements lazy loading: blocked pages only redirect when user actually views them
+ */
+async function handleVisibilityChange(): Promise<void> {
+  // Only check when page becomes visible (user switches to this tab)
+  if (document.visibilityState !== 'visible') {
+    return;
+  }
+
+  try {
+    const { session } = await sendMessage({ type: 'GET_FOCUS_STATE' });
+
+    // If session ended, redirect to original URL
+    if (!session.active || !session.currentGoal) {
+      if (originalUrl) {
+        window.location.href = originalUrl;
+      } else {
+        window.history.back();
+      }
+    }
+  } catch (error) {
+    console.error('[FinishFirst] Error checking session state:', error);
+  }
+}
+
+/**
+ * Handle storage changes - but only redirect if this page is currently visible
+ * This handles the case where user is actively viewing this blocked page
+ * when task is completed elsewhere (e.g., via popup)
+ */
+function handleStorageChangeIfVisible(changes: { [key: string]: chrome.storage.StorageChange }): void {
+  // Only process if this page is currently visible (user is viewing it)
+  if (document.visibilityState !== 'visible') {
+    return;
+  }
+
+  if (changes.focusSession) {
+    const newSession = changes.focusSession.newValue as any;
+    if (newSession && (!newSession.active || !newSession.currentGoal)) {
+      // Session ended while user is viewing this page, redirect
+      if (originalUrl) {
+        window.location.href = originalUrl;
+      } else {
+        window.history.back();
+      }
     }
   }
 }
