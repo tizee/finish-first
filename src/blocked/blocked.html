@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FinishFirst - Focus on Your Goal</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="../icons/icon32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../icons/icon16.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -109,13 +111,16 @@
       width: 52px;
       height: 52px;
       border-radius: 16px;
-      background: linear-gradient(135deg, var(--accent-terracotta) 0%, #E3A27F 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
-      box-shadow: var(--shadow-soft);
       animation: floatSoft 3s ease-in-out infinite;
+    }
+
+    .brand-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
 
     .brand-kicker {
@@ -333,7 +338,9 @@
   <main class="shell">
     <header class="header">
       <div class="brand">
-        <div class="brand-icon" id="icon">🎯</div>
+        <div class="brand-icon" id="icon">
+          <img src="../icons/icon48.png" alt="FinishFirst" width="32" height="32">
+        </div>
         <div>
           <div class="brand-kicker">FinishFirst</div>
           <h1 id="title">Focus on Your Goal</h1>
